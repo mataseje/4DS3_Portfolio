@@ -1,0 +1,123 @@
+import csv
+
+def csv_to_dict_list(file_name):
+    with open(file_name, 'r') as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        dict_list = []
+        for row in csv_reader:
+            dict_list.append(row)
+    return dict_list
+
+def bubbleSort(arr, key):
+	n = len(arr)
+	swapped = False
+	for i in range(n-1):
+		for j in range(0, n-i-1):
+			if int(arr[j][key]) > int(arr[j + 1][key]):
+				swapped = True
+				arr[j], arr[j + 1] = arr[j + 1], arr[j]
+		
+		if not swapped:
+			return
+
+def insertionSort(arr):
+    if (n := len(arr)) <= 1:
+      return
+    for i in range(1, n):
+        key = arr[i]
+        j = i-1
+        while j >= 0 and arr[j]['marketing'] == key['marketing'] and arr[j]['last_name'] > key['last_name']:
+            arr[j+1] = arr[j]
+            j -= 1
+        arr[j+1] = key
+
+def mergeSort(arr, key):
+    if len(arr) > 1:
+        mid = len(arr) // 2
+        left_half = arr[:mid]
+        right_half = arr[mid:]
+
+        mergeSort(left_half, key)
+        mergeSort(right_half, key)
+
+        i = j = k = 0
+
+        while i < len(left_half) and j < len(right_half):
+            if float(left_half[i][key]) < float(right_half[j][key]):
+                arr[k] = left_half[i]
+                i += 1
+            else:
+                arr[k] = right_half[j]
+                j += 1
+            k += 1
+
+        while i < len(left_half):
+            arr[k] = left_half[i]
+            i += 1
+            k += 1
+
+        while j < len(right_half):
+            arr[k] = right_half[j]
+            j += 1
+            k += 1
+
+def dict_list_to_csv(dict_list, file_path):
+    # Write the list to a CSV file
+    with open(file_path, mode='w', newline='') as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=dict_list[0].keys())
+        writer.writeheader()
+        for row in dict_list:
+            writer.writerow(row)
+
+def count_cust(arr):
+    count = 0
+    for x in arr:
+        if float(x.get('marketing')) == 1:
+            count += 1
+    return count
+
+def main():
+    # Customer Data and Output Files
+    customer_data = 'customer_data.csv'
+    cust_arr = csv_to_dict_list(customer_data)
+    cust_key = 'marketing'
+    sorted_marketing = 'sorted_marketing.csv'
+    sorted_marketing_name = 'sorted_marketing_name.csv'
+  
+    # Apply bubbleSort to sort data based on marketing rating
+    print('\n... Applying bubbleSort and generating sorted_marketing.csv ...')
+    bubbleSort(cust_arr, cust_key)
+    bubble_sorted = cust_arr
+    dict_list_to_csv(cust_arr, sorted_marketing)
+    print('... Applying insertionSort and generating sorted_marketing_name.csv ...\n')
+    # Apply insertionSort to sort by last name in alphabetical order
+    insertionSort(bubble_sorted)
+    dict_list_to_csv(cust_arr, sorted_marketing_name)
+    num_cust = (count_cust(cust_arr))
+    print(f'\033[1m{num_cust} are very likely to purchase if marketed to correctly\033[0m \n\n')
+
+    # Competitor Data and Output Files
+    competitor_data = 'competitor_data.csv'
+    sorted_competitor_data = 'sorted_competitor_data.csv'
+    comp_arr = csv_to_dict_list(competitor_data)
+    comp_key = 'budget'
+    print('... Applying mergeSort and generating sorted_competitor_data.csv ...\n')
+    mergeSort(comp_arr, comp_key)
+    dict_list_to_csv(comp_arr, sorted_competitor_data)
+    median_budget = float(comp_arr[len(comp_arr)//2 -1]['budget'])
+    print(f'\033[1mThe median budget for advertising spending among similar companies is ${median_budget}\033[0m\n\n')
+
+    # Answering Question 3
+    required_budget = (median_budget)*(num_cust)
+    actual_budget = 2000.00
+    print(f'\033[1mThe total required budget: ${required_budget}\033[0m\n\n')
+
+    if required_budget > actual_budget:
+        print(f'\033[1m\033[31mGiven the budget of ${actual_budget}, the company needs an additional: ${(required_budget-actual_budget):.2f}\033[0m\n\n')
+    elif actual_budget > required_budget:
+        print(f'\033[1m\033[32mGiven the budget of ${actual_budget}, the company has a surplus of: ${(actual_budget-required_budget):.2f}\033[0m\n\n')
+    elif actual_budget == required_budget:
+         print(f'\033[1m\033[32mThe company has the exact advertising budget\033[0m\n\n')
+
+
+main()
